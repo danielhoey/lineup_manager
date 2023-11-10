@@ -1,10 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import {PlayersList} from "../players"
 
-const App = () => <h1>Hello from React!</h1>;
-
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
-
-root.render(<App />);
+export const PlayersListRender= PlayersList().render; //how can I use this in players/index.slim???

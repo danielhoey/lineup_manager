@@ -1,0 +1,20 @@
+script(defer=true)
+  | PlayersListRender('player_list_app');
+
+
+section
+  h1 Player List
+
+  table
+    thead
+      tr
+        th First Name
+        th Last Name
+        th FF
+        th HF
+        th C
+        th HB
+        th FB
+        th Bench
+        th Absent
+    tbody(id="player_list_app")
