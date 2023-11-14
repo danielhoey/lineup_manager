@@ -1,5 +1,10 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import {PlayersList} from "../players"
+import {PlayersList} from "../players";
 
-export const PlayersListRender= PlayersList().render; //how can I use this in players/index.slim???
+declare global {
+  interface Window {
+    reactApps: {},
+  }
+}
+window.reactApps = {
+  'PlayersList': PlayersList,
+}
