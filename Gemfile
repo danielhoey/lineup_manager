@@ -28,7 +28,8 @@ gem "jbuilder"
 
 gem "jsbundling-rails"
 gem "slim"
-
+gem "dartsass-sprockets"
+gem "bootstrap"
 
 
 
