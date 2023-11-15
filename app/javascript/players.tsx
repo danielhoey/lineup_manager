@@ -1,32 +1,34 @@
 import React from "react";
 import {renderReactApp} from "./util";
-import {ErrorMessage, Field, Form, Formik, FormikBag, FormikHelpers, FormikState, FormikValues} from "formik";
+import {ErrorMessage, Field, Form, Formik, FormikHelpers, FormikState} from "formik";
 
 export const PlayersList = () => {
 
   const App = () => {
     let players = [{id: 1, first_name: "John", last_name: "Doe", number: 13}];
-    let fields = ['first_name', 'last_name', 'number', 'full_forward', 'half_forward', 'center', 'half_back', 'full_back', 'bench', 'absent'];
+    let fields = ['name_and_number', 'full_forward', 'half_forward', 'center', 'half_back', 'full_back', 'bench', 'absent'];
+
+    // @ts-ignore
+    players.forEach((p) => p.name_and_number = `${p.first_name} ${p.last_name} - #${p.number}`);
 
     //@ts-ignore
     const playerCells = (p) => fields.map((f,i) => <td key={i}>{p[f]}</td>);
 
     let addPlayer = (values:any, formikBag:FormikHelpers<any>) => {
       setTimeout(() => {
-        alert(JSON.stringify(values, null, 2));
+        //alert(JSON.stringify(values, null, 2));
+        formikBag.setErrors({first_name: "bad name"});
         formikBag.setSubmitting(false);
-      }, 1000)
+      }, 100)
     };
 
     return (
       <div>
 
-      <table>
+      <table className="table">
         <thead>
           <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Number</th>
+            <th>Player</th>
             <th>FF</th>
             <th>HF</th>
             <th>C</th>
@@ -45,10 +47,20 @@ export const PlayersList = () => {
           {( a:FormikState<any> ) => {
             return (
               <Form>
-                <Field type="text" name="first_name"/> <ErrorMessage name="first_name" component="div"/>
-                <Field type="text" name="last_name"/> <ErrorMessage name="last_name" component="div"/>
-                <Field type="number" name="number"/> <ErrorMessage name="number" component="div"/>
-                <button type="submit" disabled={a.isSubmitting}>Submit</button>
+                <div className="d-flex flex-row">
+                    <div className="p-2">
+                      <Field className="form-control" type="text" name="first_name"/> <ErrorMessage className="error" name="first_name" component="div"/>
+                    </div>
+                    <div className="p-2">
+                      <Field className="form-control" type="text" name="last_name"/> <ErrorMessage className="error" name="last_name" component="div"/>
+                    </div>
+                    <div className="p-2">
+                      <Field className="form-control" type="number" name="number"/> <ErrorMessage className="error" name="number" component="div"/>
+                    </div>
+                    <div className="p-2">
+                      <button className="btn btn-primary" type="submit" disabled={a.isSubmitting}>Submit</button>
+                    </div>
+                </div>
               </Form>
             );
           }}
