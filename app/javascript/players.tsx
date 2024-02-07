@@ -1,16 +1,33 @@
 import React from "react";
 import {useState} from "react";
-import {renderReactApp} from "./util";
+import {post, renderReactApp} from "./util";
 import {ErrorMessage, Field, Form, Formik, FormikHelpers, FormikState} from "formik";
 
 export const PlayersList = () => {
 
-  const App = () => {
-    const [players, setPlayers] = useState([{id: 1, first_name: "John", last_name: "Doe", number: 13}]);
-    let fields = ['name_and_number', 'full_forward', 'half_forward', 'center', 'half_back', 'full_back', 'bench', 'absent'];
+  type Player = {
+    id: bigint,
+    name: string,
+    first_name: string,
+    last_name: string,
+    number: bigint,
+    full_forward: bigint,
+    half_forward: bigint,
+    center: bigint,
+    half_back: bigint,
+    full_back: bigint,
+    bench: bigint,
+    absent: bigint,
+  }
 
-    // @ts-ignore
-    players.forEach((p) => p.name_and_number = `${p.first_name} ${p.last_name} - #${p.number}`);
+  const App = () => {
+    let players:Player[];
+    let setPlayers:Function;
+    [players, setPlayers] = useState([]);
+    let fields = ['name', 'number', 'full_forward', 'half_forward', 'center', 'half_back', 'full_back', 'bench', 'absent'];
+
+    players.forEach((p) => p.name = `${p.first_name} ${p.last_name}`);
+    const nextNumber = players.map((p) => p.number)
 
     //@ts-ignore
     const playerCells = (p) => fields.map((f,i) => <td key={i}>{p[f]}</td>);
@@ -22,7 +39,8 @@ export const PlayersList = () => {
           formikBag.setSubmitting(false);
           return;
         }
-        setPlayers([...players, values]);
+        post("/players", values, formikBag)
+          .then(data => setPlayers([...players, data]))
       }, 100)
     };
 
@@ -33,6 +51,7 @@ export const PlayersList = () => {
         <thead>
           <tr>
             <th>Player</th>
+            <th>Number</th>
             <th>FF</th>
             <th>HF</th>
             <th>C</th>
@@ -43,11 +62,11 @@ export const PlayersList = () => {
           </tr>
         </thead>
         <tbody>
-          {players.map((p) => <tr key={p.number}>{playerCells(p)}</tr> )}
+          {players.map((p) => <tr key={p.id}>{playerCells(p)}</tr> )}
         </tbody>
       </table>
 
-        <Formik initialValues={{first_name: '', last_name:'', number:0}} onSubmit={addPlayer}>
+        <Formik initialValues={{first_name: '', last_name:'', number:nextNumber}} onSubmit={addPlayer}>
           {( a:FormikState<any> ) => {
             return (
               <Form>
