@@ -17,9 +17,12 @@ export const PlayersList = () => {
 
     let addPlayer = (values:any, formikBag:FormikHelpers<any>) => {
       setTimeout(() => {
-        //formikBag.setErrors({first_name: "bad name"});
+        if (players.filter((p) => { return p.number == values.number}).length > 0) {
+          formikBag.setErrors({number: "number already taken"});
+          formikBag.setSubmitting(false);
+          return;
+        }
         setPlayers([...players, values]);
-        formikBag.setSubmitting(false);
       }, 100)
     };
 
@@ -50,7 +53,7 @@ export const PlayersList = () => {
               <Form>
                 <div className="d-flex flex-row">
                     <div className="p-2">
-                      <Field className="form-control" type="text" name="first_name"/> <ErrorMessage className="error" name="first_name" component="div"/>
+                      <Field id="first_name_input" className="form-control" type="text" name="first_name"/> <ErrorMessage className="error" name="first_name" component="div"/>
                     </div>
                     <div className="p-2">
                       <Field className="form-control" type="text" name="last_name"/> <ErrorMessage className="error" name="last_name" component="div"/>
