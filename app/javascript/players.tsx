@@ -1,11 +1,12 @@
 import React from "react";
+import {useState} from "react";
 import {renderReactApp} from "./util";
 import {ErrorMessage, Field, Form, Formik, FormikHelpers, FormikState} from "formik";
 
 export const PlayersList = () => {
 
   const App = () => {
-    let players = [{id: 1, first_name: "John", last_name: "Doe", number: 13}];
+    const [players, setPlayers] = useState([{id: 1, first_name: "John", last_name: "Doe", number: 13}]);
     let fields = ['name_and_number', 'full_forward', 'half_forward', 'center', 'half_back', 'full_back', 'bench', 'absent'];
 
     // @ts-ignore
@@ -16,8 +17,8 @@ export const PlayersList = () => {
 
     let addPlayer = (values:any, formikBag:FormikHelpers<any>) => {
       setTimeout(() => {
-        //alert(JSON.stringify(values, null, 2));
-        formikBag.setErrors({first_name: "bad name"});
+        //formikBag.setErrors({first_name: "bad name"});
+        setPlayers([...players, values]);
         formikBag.setSubmitting(false);
       }, 100)
     };
@@ -39,11 +40,11 @@ export const PlayersList = () => {
           </tr>
         </thead>
         <tbody>
-          {players.map((p) => <tr key={p.id}>{playerCells(p)}</tr> )}
+          {players.map((p) => <tr key={p.number}>{playerCells(p)}</tr> )}
         </tbody>
       </table>
 
-        <Formik initialValues={{first_name: '', last_name:'', number:null}} onSubmit={addPlayer}>
+        <Formik initialValues={{first_name: '', last_name:'', number:0}} onSubmit={addPlayer}>
           {( a:FormikState<any> ) => {
             return (
               <Form>
