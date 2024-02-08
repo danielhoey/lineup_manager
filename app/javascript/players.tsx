@@ -39,8 +39,15 @@ export const PlayersList = () => {
           formikBag.setSubmitting(false);
           return;
         }
-        post("/players", values, formikBag)
-          .then(data => setPlayers([...players, data]))
+
+        const r = post("/players", values);
+        r.then(data => setPlayers([...players, data]));
+        r.then(() => formikBag.resetForm());
+        r.catch(error => {
+          formikBag.setErrors(error);
+          formikBag.resetForm();
+        });
+
       }, 100)
     };
 

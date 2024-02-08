@@ -3,5 +3,6 @@ class PlayersController < ApplicationController
   end
 
   def create
+    render :json => params[:player]
   end
 end
