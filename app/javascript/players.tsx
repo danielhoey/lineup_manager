@@ -33,6 +33,11 @@ export const PlayersList = () => {
     const playerCells = (p) => fields.map((f,i) => <td key={i}>{p[f]}</td>);
 
     let addPlayer = (values:any, formikBag:FormikHelpers<any>) => {
+      function resetForm() {
+        formikBag.resetForm();
+        document.getElementById('first_name_input')?.focus();
+      }
+
       setTimeout(() => {
         if (players.filter((p) => { return p.number == values.number}).length > 0) {
           formikBag.setErrors({number: "number already taken"});
@@ -42,10 +47,10 @@ export const PlayersList = () => {
 
         const r = post("/players", values);
         r.then(data => setPlayers([...players, data]));
-        r.then(() => formikBag.resetForm());
+        r.then(() => resetForm());
         r.catch(error => {
           formikBag.setErrors(error);
-          formikBag.resetForm();
+          resetForm();
         });
 
       }, 100)
