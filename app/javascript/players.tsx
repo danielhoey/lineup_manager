@@ -3,34 +3,27 @@ import {useState} from "react";
 import {post, renderReactApp} from "./util";
 import {ErrorMessage, Field, Form, Formik, FormikHelpers, FormikState} from "formik";
 
-export const PlayersList = () => {
-
-  type Player = {
-    id: bigint,
-    name: string,
-    first_name: string,
-    last_name: string,
-    number: bigint,
-    full_forward: bigint,
-    half_forward: bigint,
-    center: bigint,
-    half_back: bigint,
-    full_back: bigint,
-    bench: bigint,
-    absent: bigint,
-  }
+type Player = {
+  id: bigint,
+  first_name: string,
+  last_name: string,
+  number: bigint,
+  full_forward: bigint,
+  half_forward: bigint,
+  center: bigint,
+  half_back: bigint,
+  full_back: bigint,
+  bench: bigint,
+  absent: bigint,
+}
+export const PlayersList = (player_data:Player[]) => {
 
   const App = () => {
     let players:Player[];
     let setPlayers:Function;
-    [players, setPlayers] = useState([]);
-    let fields = ['name', 'number', 'full_forward', 'half_forward', 'center', 'half_back', 'full_back', 'bench', 'absent'];
+    [players, setPlayers] = useState(player_data);
 
-    players.forEach((p) => p.name = `${p.first_name} ${p.last_name}`);
     const nextNumber = players.map((p) => p.number)
-
-    //@ts-ignore
-    const playerCells = (p) => fields.map((f,i) => <td key={i}>{p[f]}</td>);
 
     let addPlayer = (values:any, formikBag:FormikHelpers<any>) => {
       function resetForm() {
@@ -74,7 +67,18 @@ export const PlayersList = () => {
           </tr>
         </thead>
         <tbody>
-          {players.map((p) => <tr key={p.id}>{playerCells(p)}</tr> )}
+          {players.map((p) =>
+            <tr key={p.id}>
+              <td>{p.first_name} {p.last_name}</td>
+              <td>{p.number}</td>
+              <td>{p.full_forward}</td>
+              <td>{p.half_forward}</td>
+              <td>{p.center}</td>
+              <td>{p.full_back}</td>
+              <td>{p.half_back}</td>
+              <td>{p.bench}</td>
+              <td>{p.absent}</td>
+            </tr>)}
         </tbody>
       </table>
 

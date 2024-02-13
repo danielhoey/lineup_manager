@@ -1,5 +1,5 @@
 script(defer=true)
-  | window.onload = () => { reactApps.PlayersList().render('player_list_app'); }
+  | window.onload = () => { reactApps.PlayersList(#{@players.to_json.html_safe}).render('player_list_app'); }
 
 section
   h1 Player List

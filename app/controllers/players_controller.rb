@@ -1,5 +1,6 @@
 class PlayersController < ApplicationController
   def index
+    @players = Player.select('id, first_name, last_name, number')
   end
 
   def create
