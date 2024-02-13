@@ -3,6 +3,7 @@ class PlayersController < ApplicationController
   end
 
   def create
-    render :json => params[:player]
+    p = Player.create(params[:player].permit(:first_name, :last_name, :number))
+    render :json => p.to_json
   end
 end
