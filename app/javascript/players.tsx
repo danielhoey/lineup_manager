@@ -1,29 +1,30 @@
-import React from "react";
-import {useState} from "react";
+import React, {useState} from "react";
 import {post, renderReactApp} from "./util";
 import {ErrorMessage, Field, Form, Formik, FormikHelpers, FormikState} from "formik";
+import * as _ from "lodash";
 
 type Player = {
   id: bigint,
   first_name: string,
   last_name: string,
-  number: bigint,
-  full_forward: bigint,
-  half_forward: bigint,
-  center: bigint,
-  half_back: bigint,
-  full_back: bigint,
-  bench: bigint,
-  absent: bigint,
+  number: number,
+  full_forward: number,
+  half_forward: number,
+  center: number,
+  half_back: number,
+  full_back: number,
+  bench: number,
+  absent: number,
 }
 export const PlayersList = (player_data:Player[]) => {
+
 
   const App = () => {
     let players:Player[];
     let setPlayers:Function;
     [players, setPlayers] = useState(player_data);
 
-    const nextNumber = players.map((p) => p.number)
+    const nextNumber = Math.max(...players.map((p) => p.number))+1;
 
     let addPlayer = (values:any, formikBag:FormikHelpers<any>) => {
       function resetForm() {
@@ -46,41 +47,56 @@ export const PlayersList = (player_data:Player[]) => {
           resetForm();
         });
 
-      }, 100)
+      }, 100);
     };
+
+    function sort(field:string) {
+      setPlayers(_.sortBy(players, field));
+    }
+
+    //@ts-ignore
+    const TableHeading = ({sort_field, label}) => {
+      function handleClick(){
+        sort(sort_field)
+      }
+      return (
+        <th data-sort='{sort_field}' onClick={handleClick}>{label} <span className="arrow">&darr;</span></th>
+      )
+    }
+
 
     return (
       <div>
 
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Player</th>
-            <th>Number</th>
-            <th>FF</th>
-            <th>HF</th>
-            <th>C</th>
-            <th>HB</th>
-            <th>FB</th>
-            <th>Bench</th>
-            <th>Absent</th>
+        <table className="table">
+          <thead>
+          <tr className="sortable-row">
+            <TableHeading label="Player" sort_field="first_name" />
+            <TableHeading label="Number" sort_field="number" />
+            <TableHeading label="FF" sort_field="full_forward" />
+            <TableHeading label="HF" sort_field="half_forward" />
+            <TableHeading label="C" sort_field="center" />
+            <TableHeading label="HB" sort_field="half_back" />
+            <TableHeading label="FB" sort_field="full_back" />
+            <TableHeading label="Bench" sort_field="bench" />
+            <TableHeading label="Absent" sort_field="absent" />
           </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
           {players.map((p) =>
-            <tr key={p.id}>
-              <td>{p.first_name} {p.last_name}</td>
-              <td>{p.number}</td>
-              <td>{p.full_forward}</td>
-              <td>{p.half_forward}</td>
-              <td>{p.center}</td>
-              <td>{p.full_back}</td>
-              <td>{p.half_back}</td>
-              <td>{p.bench}</td>
-              <td>{p.absent}</td>
-            </tr>)}
-        </tbody>
-      </table>
+              <tr key={p.id}>
+                <td>{p.first_name} {p.last_name}</td>
+                <td>{p.number}</td>
+                <td>{p.full_forward}</td>
+                <td>{p.half_forward}</td>
+                <td>{p.center}</td>
+                <td>{p.full_back}</td>
+                <td>{p.half_back}</td>
+                <td>{p.bench}</td>
+                <td>{p.absent}</td>
+              </tr>)}
+          </tbody>
+        </table>
 
         <Formik initialValues={{first_name: '', last_name:'', number:nextNumber}} onSubmit={addPlayer}>
           {( a:FormikState<any> ) => {

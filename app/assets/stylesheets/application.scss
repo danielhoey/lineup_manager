@@ -14,4 +14,18 @@
  */
  @import "bootstrap";
 
+
 .error { color: $red; }
+
+
+.sortable-row {
+  th { cursor: pointer; }
+
+  th {
+    .arrow { visibility: hidden; }
+  }
+
+  th:hover {
+    .arrow { visibility: visible; }
+  }
+}
