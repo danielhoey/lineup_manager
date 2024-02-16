@@ -22,10 +22,13 @@
   th { cursor: pointer; }
 
   th {
-    .arrow { visibility: hidden; }
+    .sort { visibility: hidden; }
+    .sort.selected { visibility: visible; }
   }
 
   th:hover {
-    .arrow { visibility: visible; }
+    .sort { visibility: visible; }
   }
+
+  th > .sort { margin-left: 0.5em; }
 }

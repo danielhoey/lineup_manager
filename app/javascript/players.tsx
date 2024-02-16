@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useInsertionEffect, useState} from "react";
 import {post, renderReactApp} from "./util";
 import {ErrorMessage, Field, Form, Formik, FormikHelpers, FormikState} from "formik";
 import * as _ from "lodash";
@@ -18,7 +18,7 @@ type Player = {
 }
 export const PlayersList = (player_data:Player[]) => {
 
-
+  let currentSort = {field: '', dir: -1};
   const App = () => {
     let players:Player[];
     let setPlayers:Function;
@@ -51,35 +51,53 @@ export const PlayersList = (player_data:Player[]) => {
     };
 
     function sort(field:string) {
-      setPlayers(_.sortBy(players, field));
+      if (currentSort.field == field) {
+        currentSort.dir = currentSort.dir * -1;
+      } else {
+        currentSort.field = field;
+        currentSort.dir = 1;
+      }
+
+      let newPlayers = _.sortBy(players, field);
+      if (currentSort.dir == -1) { newPlayers.reverse(); }
+      setPlayers(newPlayers);
     }
 
-    //@ts-ignore
-    const TableHeading = ({sort_field, label}) => {
-      function handleClick(){
-        sort(sort_field)
-      }
+    // @ts-ignore
+    const TableHeading = ({sortField: sortField, label}) => {
+      function handleClick(){ sort(sortField) }
+      //TODO: change arrow direction depending on sortDir and indicate which column is currently being sorted
+      let selectedSortField = currentSort.field == sortField;
+      let descendingSort = false;
+      if (selectedSortField && currentSort.dir == -1) { descendingSort = true; }
       return (
-        <th data-sort='{sort_field}' onClick={handleClick}>{label} <span className="arrow">&darr;</span></th>
+          <th data-sort={sortField} onClick={handleClick}>{label}
+            <span className={selectedSortField ? 'sort selected' : 'sort'}>
+              {descendingSort
+                ? <img src="/assets/sort-down.svg" alt="sort" width="20" height="20"/>
+                : <img src="/assets/sort-down-alt.svg" alt="sort" width="20" height="20"/>
+              }
+            </span>
+          </th>
       )
     }
 
 
     return (
-      <div>
+        <div>
 
         <table className="table">
           <thead>
           <tr className="sortable-row">
-            <TableHeading label="Player" sort_field="first_name" />
-            <TableHeading label="Number" sort_field="number" />
-            <TableHeading label="FF" sort_field="full_forward" />
-            <TableHeading label="HF" sort_field="half_forward" />
-            <TableHeading label="C" sort_field="center" />
-            <TableHeading label="HB" sort_field="half_back" />
-            <TableHeading label="FB" sort_field="full_back" />
-            <TableHeading label="Bench" sort_field="bench" />
-            <TableHeading label="Absent" sort_field="absent" />
+            <TableHeading label="Player" sortField="first_name" />
+            <TableHeading label="Number" sortField="number" />
+            <TableHeading label="FF" sortField="full_forward" />
+            <TableHeading label="HF" sortField="half_forward" />
+            <TableHeading label="C" sortField="center" />
+            <TableHeading label="HB" sortField="half_back" />
+            <TableHeading label="FB" sortField="full_back" />
+            <TableHeading label="Bench" sortField="bench" />
+            <TableHeading label="Absent" sortField="absent" />
           </tr>
           </thead>
           <tbody>
