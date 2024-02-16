@@ -1,5 +1,5 @@
 import React, {useInsertionEffect, useState} from "react";
-import {post, renderReactApp} from "./util";
+import {http_delete, post, renderReactApp} from "./util";
 import {ErrorMessage, Field, Form, Formik, FormikHelpers, FormikState} from "formik";
 import * as _ from "lodash";
 
@@ -63,6 +63,19 @@ export const PlayersList = (player_data:Player[]) => {
       setPlayers(newPlayers);
     }
 
+    function _delete(player:Player){
+      const r = http_delete(`/players/${player.id}`);
+      r.then(data => {
+        //@ts-ignore
+        if (data.deleted){
+          setPlayers(_.reject(players, {id: player.id}));
+        } else {
+          // replace player with data.player
+        }
+      });
+      r.catch(error => { alert(`Unexpected Error ${error}`) });
+    }
+
     // @ts-ignore
     const TableHeading = ({sortField, label}) => {
       function handleClick(){ sort(sortField) }
@@ -113,7 +126,7 @@ export const PlayersList = (player_data:Player[]) => {
                     <td>{p.number}</td>
                     <td className="edit">
                       <img src="/assets/pencil-square.svg" alt="sort" width="20" height="20"/>
-                      <img src="/assets/x-square.svg" alt="sort" width="20" height="20"/>
+                      <img src="/assets/x-square.svg" alt="sort" width="20" height="20" onClick={() => _delete(p)}/>
                     </td>
                     <td>{p.full_forward}</td>
                     <td>{p.half_forward}</td>
@@ -127,7 +140,7 @@ export const PlayersList = (player_data:Player[]) => {
             </table>
           </section>
 
-          <Formik initialValues={{first_name: '', last_name: '', number: null}} onSubmit={addPlayer}>
+          <Formik initialValues={{first_name: '', last_name: '', number: ''}} onSubmit={addPlayer}>
             {( a:FormikState<any> ) => {
             return (
                 <section>

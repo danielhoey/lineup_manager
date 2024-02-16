@@ -7,4 +7,10 @@ class PlayersController < ApplicationController
     p = Player.create(params[:player].permit(:first_name, :last_name, :number))
     render :json => p.to_json
   end
+
+  def destroy
+    p = Player.find(params[:id])
+    p.delete
+    render :json => {id: p.id, deleted: true}
+  end
 end

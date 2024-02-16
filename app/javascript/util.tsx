@@ -1,7 +1,6 @@
 import React from "react";
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client";
-import {FormikHelpers} from "formik";
 
 export const renderReactApp = (elementId:string, reactApp:React.ElementType) => {
   const FN = reactApp;
@@ -10,11 +9,18 @@ export const renderReactApp = (elementId:string, reactApp:React.ElementType) => 
 }
 
 export function post(url:string, data:Object):Promise<Response> {
-  const element = document.querySelector("meta[name='csrf-token']") as HTMLElement;
-  const csrf = element.getAttribute("content") || '';
-
+  let csrf = getCsrfToken();
   let promise = fetch(url, {method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }, body: JSON.stringify(data)});
-  promise = promise.then(response => response.json());
+  return promise.then(response => response.json());
+}
 
-  return promise;
+export function http_delete(url:string):Promise<Response> {
+  let csrf = getCsrfToken();
+  let promise = fetch(url, {method: 'DELETE', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }});
+  return promise.then(response => response.json());
+}
+
+function getCsrfToken(){
+  const element = document.querySelector("meta[name='csrf-token']") as HTMLElement;
+  return element.getAttribute("content") || '';
 }
