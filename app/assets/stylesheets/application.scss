@@ -17,6 +17,7 @@
 
 .error { color: $red; }
 
+section + section { margin-top: 2em; }
 
 .sortable-row {
   th { cursor: pointer; }
@@ -31,4 +32,23 @@
   }
 
   th > .sort { margin-left: 0.5em; }
+}
+
+@include media-breakpoint-down(sm) {
+  form .col-sm { margin-bottom: 1em; }
+}
+
+body > .players.index {
+  table {
+    .edit { width: 80px; }
+    .edit img { margin-right: 0.5em; }
+    th.number { width: 8em; }
+    tr.top-level-heading {
+      th { text-align: center; font-style: italic; font-weight: normal; font-size: large; }
+    }
+
+    tr > *:nth-child(4) { padding-left: 1em; border-left: 1px solid; border-left-color: inherit; }
+    tr.top-level-heading th + th { border-left: 1px solid; border-left-color: inherit; }
+  }
+
 }

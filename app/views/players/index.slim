@@ -1,7 +1,7 @@
 script(defer=true)
   | window.onload = () => { reactApps.PlayersList(#{@players.to_json.html_safe}).render('player_list_app'); }
 
-section
+div(class="container players index")
   h1 Player List
 
   div(id="player_list_app")

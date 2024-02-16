@@ -64,16 +64,15 @@ export const PlayersList = (player_data:Player[]) => {
     }
 
     // @ts-ignore
-    const TableHeading = ({sortField: sortField, label}) => {
+    const TableHeading = ({sortField, label}) => {
       function handleClick(){ sort(sortField) }
-      //TODO: change arrow direction depending on sortDir and indicate which column is currently being sorted
-      let selectedSortField = currentSort.field == sortField;
-      let descendingSort = false;
-      if (selectedSortField && currentSort.dir == -1) { descendingSort = true; }
+      let selected = currentSort.field == sortField;
+      let descending = false;
+      if (selected && currentSort.dir == -1) { descending = true; }
       return (
-          <th data-sort={sortField} onClick={handleClick}>{label}
-            <span className={selectedSortField ? 'sort selected' : 'sort'}>
-              {descendingSort
+          <th className={label.toLowerCase()} onClick={handleClick}>{label}
+            <span className={selected ? 'sort selected' : 'sort'}>
+              {descending
                 ? <img src="/assets/sort-down.svg" alt="sort" width="20" height="20"/>
                 : <img src="/assets/sort-down-alt.svg" alt="sort" width="20" height="20"/>
               }
@@ -86,59 +85,81 @@ export const PlayersList = (player_data:Player[]) => {
     return (
         <div>
 
-        <table className="table">
-          <thead>
-          <tr className="sortable-row">
-            <TableHeading label="Player" sortField="first_name" />
-            <TableHeading label="Number" sortField="number" />
-            <TableHeading label="FF" sortField="full_forward" />
-            <TableHeading label="HF" sortField="half_forward" />
-            <TableHeading label="C" sortField="center" />
-            <TableHeading label="HB" sortField="half_back" />
-            <TableHeading label="FB" sortField="full_back" />
-            <TableHeading label="Bench" sortField="bench" />
-            <TableHeading label="Absent" sortField="absent" />
-          </tr>
-          </thead>
-          <tbody>
-          {players.map((p) =>
-              <tr key={p.id}>
-                <td>{p.first_name} {p.last_name}</td>
-                <td>{p.number}</td>
-                <td>{p.full_forward}</td>
-                <td>{p.half_forward}</td>
-                <td>{p.center}</td>
-                <td>{p.full_back}</td>
-                <td>{p.half_back}</td>
-                <td>{p.bench}</td>
-                <td>{p.absent}</td>
-              </tr>)}
-          </tbody>
-        </table>
+          <section>
+            <table className="table">
+              <thead>
+              <tr className={"top-level-heading"}>
+                <th colSpan={3}>Player</th>
+                <th className={"stats"} colSpan={7}>Stats</th>
+              </tr>
+              <tr className="sortable-row">
+                  <TableHeading label="Name" sortField="first_name"/>
+                  <TableHeading label="Number" sortField="number"/>
+                  <th className={"edit"}>
+                  </th>
+                  <TableHeading label="FF" sortField="full_forward"/>
+                  <TableHeading label="HF" sortField="half_forward"/>
+                  <TableHeading label="C" sortField="center"/>
+                  <TableHeading label="HB" sortField="half_back"/>
+                  <TableHeading label="FB" sortField="full_back"/>
+                  <TableHeading label="Bench" sortField="bench"/>
+                  <TableHeading label="Absent" sortField="absent"/>
+                </tr>
+              </thead>
+              <tbody>
+              {players.map((p) =>
+                  <tr key={p.id}>
+                    <td>{p.first_name} {p.last_name}</td>
+                    <td>{p.number}</td>
+                    <td className="edit">
+                      <img src="/assets/pencil-square.svg" alt="sort" width="20" height="20"/>
+                      <img src="/assets/x-square.svg" alt="sort" width="20" height="20"/>
+                    </td>
+                    <td>{p.full_forward}</td>
+                    <td>{p.half_forward}</td>
+                    <td>{p.center}</td>
+                    <td>{p.full_back}</td>
+                    <td>{p.half_back}</td>
+                    <td>{p.bench}</td>
+                    <td>{p.absent}</td>
+                  </tr>)}
+              </tbody>
+            </table>
+          </section>
 
-        <Formik initialValues={{first_name: '', last_name:'', number:nextNumber}} onSubmit={addPlayer}>
-          {( a:FormikState<any> ) => {
+          <Formik initialValues={{first_name: '', last_name: '', number: null}} onSubmit={addPlayer}>
+            {( a:FormikState<any> ) => {
             return (
-              <Form>
-                <div className="d-flex flex-row">
-                    <div className="p-2">
-                      <Field id="first_name_input" className="form-control" type="text" name="first_name"/> <ErrorMessage className="error" name="first_name" component="div"/>
+                <section>
+                  <Form>
+                    <div className="row">
+                      <h5>New Player</h5>
                     </div>
-                    <div className="p-2">
-                      <Field className="form-control" type="text" name="last_name"/> <ErrorMessage className="error" name="last_name" component="div"/>
+                    <div className="row">
+                      <div className="col-sm">
+                        <Field id="first_name_input" className="form-control" type="text" name="first_name"
+                               placeholder="First name"/> <ErrorMessage className="error" name="first_name"
+                                                                        component="div"/>
+                      </div>
+                      <div className="col-sm">
+                        <Field className="form-control" type="text" name="last_name" placeholder="Last name"/>
+                        <ErrorMessage className="error" name="last_name" component="div"/>
+                      </div>
+                      <div className="col-sm">
+                        <Field className="form-control" type="number" name="number" placeholder={"Number"} min={0}/> <ErrorMessage className="error"
+                                                                                                    name="number"
+                                                                                                    component="div"/>
+                      </div>
+                      <div className="col-sm">
+                        <button className="btn btn-primary" type="submit" disabled={a.isSubmitting}>Submit</button>
+                      </div>
                     </div>
-                    <div className="p-2">
-                      <Field className="form-control" type="number" name="number"/> <ErrorMessage className="error" name="number" component="div"/>
-                    </div>
-                    <div className="p-2">
-                      <button className="btn btn-primary" type="submit" disabled={a.isSubmitting}>Submit</button>
-                    </div>
-                </div>
-              </Form>
-            );
+                  </Form>
+                </section>
+          );
           }}
-        </Formik>
-      </div>
+          </Formik>
+          </div>
 
     );
   };
