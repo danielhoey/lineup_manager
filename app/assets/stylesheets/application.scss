@@ -41,7 +41,7 @@ section + section { margin-top: 2em; }
 body > .players.index {
   table {
     .edit { width: 80px; }
-    .edit img { margin-right: 0.5em; }
+    .edit img { margin-right: 0.5em; cursor: pointer; }
     th.number { width: 8em; }
     tr.top-level-heading {
       th { text-align: center; font-style: italic; font-weight: normal; font-size: large; }

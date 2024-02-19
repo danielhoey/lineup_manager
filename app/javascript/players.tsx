@@ -65,12 +65,14 @@ export const PlayersList = (player_data:Player[]) => {
 
     function _delete(player:Player){
       const r = http_delete(`/players/${player.id}`);
-      r.then(data => {
-        //@ts-ignore
+      r.then((data:any) => {
         if (data.deleted){
           setPlayers(_.reject(players, {id: player.id}));
         } else {
-          // replace player with data.player
+          const i = players.indexOf(player);
+          let playersClone = Array.from(players);
+          playersClone[i] = data;
+          setPlayers(playersClone);
         }
       });
       r.catch(error => { alert(`Unexpected Error ${error}`) });
