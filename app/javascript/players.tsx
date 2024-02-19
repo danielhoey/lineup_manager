@@ -1,9 +1,9 @@
-import React, {useInsertionEffect, useState} from "react";
-import {http_delete, post, put, renderReactApp} from "./util";
+import React, {ReactNode, useState} from "react";
+import {http_delete, makeTableHeading, post, put, renderReactApp, updateElement} from "./util";
 import {ErrorMessage, Field, Form, Formik, FormikHelpers, FormikState} from "formik";
 import * as _ from "lodash";
 
-type Player = {
+export type Player = {
   id: bigint,
   first_name: string,
   last_name: string,
@@ -19,13 +19,11 @@ type Player = {
 }
 export const PlayersList = (player_data:Player[]) => {
 
-  let currentSort = {field: '', dir: -1};
+  let sortData = {field: '', dir: -1};
   const App = () => {
     let players:Player[];
     let setPlayers:Function;
     [players, setPlayers] = useState(player_data);
-
-    const nextNumber = Math.max(...players.map((p) => p.number))+1;
 
     let addPlayer = (values:any, formikBag:FormikHelpers<any>) => {
       function resetForm() {
@@ -51,19 +49,6 @@ export const PlayersList = (player_data:Player[]) => {
       }, 100);
     };
 
-    function sort(field:string) {
-      if (currentSort.field == field) {
-        currentSort.dir = currentSort.dir * -1;
-      } else {
-        currentSort.field = field;
-        currentSort.dir = 1;
-      }
-
-      let newPlayers = _.sortBy(players, field);
-      if (currentSort.dir == -1) { newPlayers.reverse(); }
-      setPlayers(newPlayers);
-    }
-
     function _delete(player:Player){
       const r = http_delete(`/players/${player.id}`);
       r.then((data:any) => {
@@ -77,15 +62,7 @@ export const PlayersList = (player_data:Player[]) => {
     }
 
     function updatePlayer(player:Player, data:any) {
-      const i = players.indexOf(player);
-      let playersClone = Array.from(players);
-      let newPlayer = {...player};
-      for (const [key,value] of Object.entries(data)) {
-        // @ts-ignore
-        newPlayer[key] = value;
-      }
-      playersClone[i] = newPlayer;
-      setPlayers(playersClone);
+      return updateElement(player, players, setPlayers, data);
     }
 
     function savePlayer() {
@@ -99,22 +76,10 @@ export const PlayersList = (player_data:Player[]) => {
     function cancelEdit(){ window.location.reload(); }
 
     // @ts-ignore
-    const TableHeading = ({sortField, label}) => {
-      function handleClick(){ sort(sortField) }
-      let selected = currentSort.field == sortField;
-      let descending = false;
-      if (selected && currentSort.dir == -1) { descending = true; }
-      return (
-          <th className={label.toLowerCase()} onClick={handleClick}>{label}
-            <span className={selected ? 'sort selected' : 'sort'}>
-              {descending
-                ? <img src="/assets/sort-down.svg" alt="sort" width="20" height="20"/>
-                : <img src="/assets/sort-down-alt.svg" alt="sort" width="20" height="20"/>
-              }
-            </span>
-          </th>
-      )
+    function TableHeading({sortField, label}): ReactNode {
+      return makeTableHeading(sortField, label, sortData, players, setPlayers);
     }
+
 
 
     return (

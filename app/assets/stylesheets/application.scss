@@ -14,10 +14,13 @@
  */
  @import "bootstrap";
 
+body > .container { margin-bottom: 50px; }
 
 .error { color: $red; }
 
-section + section { margin-top: 2em; }
+section { margin-top: 1rem; }
+section + section { margin-top: 2rem; }
+table + section { margin-top: 2rem; }
 
 .sortable-row {
   th { cursor: pointer; }
@@ -52,5 +55,29 @@ body > .players.index {
     tr > *:nth-child(4) { padding-left: 1em; border-left: 1px solid; border-left-color: inherit; }
     tr.top-level-heading th + th { border-left: 1px solid; border-left-color: inherit; }
   }
+}
 
+body > .games.show {
+  h3 { text-align: center; }
+
+  .team-list {
+    .\# { width: 60px; }
+    tr { cursor: pointer;}
+    td > .player { padding: 3px; margin: 2px; }
+    tr.selected > td > .player { border: 2px solid $primary; border-radius: 7px; margin: 0; }
+    tr.assigned > td { opacity: 0.5; }
+  }
+
+  .line-up {
+    & { padding-right: 3rem; }
+    .field { margin-top: 1rem; }
+    .row { margin-bottom: 2rem; }
+    .heading { font-weight: bold; padding-right: 0; }
+    .position { border-bottom: 1px solid; margin-right: 1rem; cursor: pointer; }
+    .position > p { max-height: 1em; }
+  ;
+    .heading,.position { padding: 1rem 0; text-align: center; }
+
+    .selected.position { border: 2px solid $primary; border-radius: 7px; }
+  }
 }

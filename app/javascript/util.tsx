@@ -1,6 +1,7 @@
 import React from "react";
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client";
+import * as _ from "lodash";
 
 export const renderReactApp = (elementId:string, reactApp:React.ElementType) => {
   const FN = reactApp;
@@ -29,4 +30,48 @@ export function http_delete(url:string):Promise<Response> {
 function getCsrfToken(){
   const element = document.querySelector("meta[name='csrf-token']") as HTMLElement;
   return element.getAttribute("content") || '';
+}
+
+
+
+//@ts-ignore
+export function updateElement(element, elementsArray, setElementsFn, newData){
+  const i = elementsArray.indexOf(element);
+  for (const [key,value] of Object.entries(newData)) {
+    // @ts-ignore
+    element[key] = value;
+  }
+  setElementsFn(Array.from(elementsArray));
+}
+
+// @ts-ignore
+export function makeTableHeading(sortField, label, sortData, elements, setElementsFn) {
+  function handleClick() {
+    if (sortData.field == sortField) {
+      sortData.dir = sortData.dir * -1;
+    } else {
+      sortData.field = sortField;
+      sortData.dir = 1;
+    }
+
+    let newElements = _.sortBy(elements, sortField);
+    if (sortData.dir == -1) { newElements.reverse(); }
+    setElementsFn(newElements);
+  }
+
+  let selected = sortData.field == sortField;
+  let descending = false;
+  if (selected && sortData.dir == -1) {
+    descending = true;
+  }
+  return (
+      <th className={label.toLowerCase()} onClick={handleClick}>{label}
+        <span className={selected ? 'sort selected' : 'sort'}>
+              {descending
+                  ? <img src="/assets/sort-down.svg" alt="sort" width="20" height="20"/>
+                  : <img src="/assets/sort-down-alt.svg" alt="sort" width="20" height="20"/>
+              }
+            </span>
+      </th>
+  )
 }
