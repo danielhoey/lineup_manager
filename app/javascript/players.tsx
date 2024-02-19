@@ -1,5 +1,5 @@
 import React, {useInsertionEffect, useState} from "react";
-import {http_delete, post, renderReactApp} from "./util";
+import {http_delete, post, put, renderReactApp} from "./util";
 import {ErrorMessage, Field, Form, Formik, FormikHelpers, FormikState} from "formik";
 import * as _ from "lodash";
 
@@ -15,6 +15,7 @@ type Player = {
   full_back: number,
   bench: number,
   absent: number,
+  editing: boolean,
 }
 export const PlayersList = (player_data:Player[]) => {
 
@@ -69,14 +70,33 @@ export const PlayersList = (player_data:Player[]) => {
         if (data.deleted){
           setPlayers(_.reject(players, {id: player.id}));
         } else {
-          const i = players.indexOf(player);
-          let playersClone = Array.from(players);
-          playersClone[i] = data;
-          setPlayers(playersClone);
+          updatePlayer(player, data)
         }
       });
-      r.catch(error => { alert(`Unexpected Error ${error}`) });
+      r.catch(error => { alert('Unexpected Error') });
     }
+
+    function updatePlayer(player:Player, data:any) {
+      const i = players.indexOf(player);
+      let playersClone = Array.from(players);
+      let newPlayer = {...player};
+      for (const [key,value] of Object.entries(data)) {
+        // @ts-ignore
+        newPlayer[key] = value;
+      }
+      playersClone[i] = newPlayer;
+      setPlayers(playersClone);
+    }
+
+    function savePlayer() {
+      const player = players.find((p) => p.editing);
+      if (player) {
+        updatePlayer(player, {editing: false});
+        put(`/players/${player.id}`, player).
+          catch(error => { alert('Unexpected Error') });
+      }
+    }
+    function cancelEdit(){ window.location.reload(); }
 
     // @ts-ignore
     const TableHeading = ({sortField, label}) => {
@@ -124,11 +144,29 @@ export const PlayersList = (player_data:Player[]) => {
               <tbody>
               {players.map((p) =>
                   <tr key={p.id}>
-                    <td>{p.first_name} {p.last_name}</td>
-                    <td>{p.number}</td>
-                    <td className="edit">
-                      <img src="/assets/pencil-square.svg" alt="sort" width="20" height="20"/>
-                      <img src="/assets/x-square.svg" alt="sort" width="20" height="20" onClick={() => _delete(p)}/>
+                    <td>
+                      {p.editing
+                          ? <div><input type="text" value={p.first_name} onChange={(e) => updatePlayer(p, {'first_name': e.target.value})}/> <input type="text" value={p.last_name} onChange={(e) => updatePlayer(p, {'last_name': e.target.value})}/></div>
+                          : <p>{p.first_name} {p.last_name}</p>
+                      }
+                    </td>
+                    <td>
+                      {p.editing
+                        ? <input type="number" value={p.number} onChange={(e) => updatePlayer(p, {'number': e.target.value})}/>
+                        : <p>{p.number}</p>
+                      }
+                    </td>
+                    <td className="actions">
+                      {p.editing
+                        ? <div>
+                            <img title="Save" src="/assets/floppy.svg" alt="sort" width="20" height="20" onClick={savePlayer}/>
+                            <img title="Cancel" src="/assets/cancel.svg" alt="sort" width="20" height="20" onClick={cancelEdit}/>
+                          </div>
+                          : <div>
+                            <img title="Edit" src="/assets/pencil-square.svg" alt="sort" width="20" height="20" onClick={() => updatePlayer(p, {editing: true})}/>
+                            <img title="Delete" src="/assets/x-square.svg" alt="sort" width="20" height="20" onClick={() => _delete(p)}/>
+                          </div>
+                      }
                     </td>
                     <td>{p.full_forward}</td>
                     <td>{p.half_forward}</td>

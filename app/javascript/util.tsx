@@ -14,6 +14,12 @@ export function post(url:string, data:Object):Promise<Response> {
   return promise.then(response => response.json());
 }
 
+export function put(url:string, data:Object):Promise<Response> {
+  let csrf = getCsrfToken();
+  let promise = fetch(url, {method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }, body: JSON.stringify(data)});
+  return promise.then(response => response.json());
+}
+
 export function http_delete(url:string):Promise<Response> {
   let csrf = getCsrfToken();
   let promise = fetch(url, {method: 'DELETE', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }});

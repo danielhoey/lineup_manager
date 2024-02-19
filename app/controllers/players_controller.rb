@@ -8,6 +8,12 @@ class PlayersController < ApplicationController
     render :json => p.to_json
   end
 
+  def update
+    p = Player.find(params[:id])
+    p.update(params.permit(:first_name, :last_name, :number))
+    render :json => p.to_json
+  end
+
   def destroy
     p = Player.find(params[:id])
     if p.position_records.empty?
