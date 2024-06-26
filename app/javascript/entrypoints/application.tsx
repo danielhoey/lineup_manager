@@ -1,5 +1,6 @@
 import {PlayersList} from "../players";
 import {LineupEditor} from "../lineup_editor";
+import {MatchesList} from "../matches";
 
 declare global {
   interface Window {
@@ -8,5 +9,6 @@ declare global {
 }
 window.reactApps = {
   'PlayersList': PlayersList,
+  'MatchesList': MatchesList,
   'LineupEditor': LineupEditor,
 }

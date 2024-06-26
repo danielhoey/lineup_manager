@@ -1,0 +1,11 @@
+script(defer=true)
+  | window.onload = () => { reactApps.MatchesList(#{@matches.to_json.html_safe}).render('matches_app'); }
+
+div(class="container #{controller_name} #{action_name}")
+  h1 Matches
+
+  div(id="matches_app")
+
+
+
+

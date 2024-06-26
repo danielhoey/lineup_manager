@@ -107,7 +107,7 @@ export const PlayersList = (player_data:Player[]) => {
                 </tr>
               </thead>
               <tbody>
-              {players.map((p) =>
+                {players.map((p) =>
                   <tr key={p.id}>
                     <td>
                       {p.editing
