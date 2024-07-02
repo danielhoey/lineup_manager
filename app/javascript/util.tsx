@@ -40,7 +40,6 @@ class FetchError extends Error {
 
 //@ts-ignore
 export function updateElement(element, elementsArray, setElementsFn, newData){
-  const i = elementsArray.indexOf(element);
   for (const [key,value] of Object.entries(newData)) {
     // @ts-ignore
     element[key] = value;

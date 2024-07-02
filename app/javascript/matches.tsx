@@ -64,10 +64,10 @@ export const MatchesList = (match_data:Match[]) => {
                   <td>{m.round.toString()}</td>
                   <td>{m.opponent}</td>
                   <td>{m.completed
-                    ? <a href="/matches/#{m.round}">View Position History</a>
-                    : <a href="/matches/#{m.round}">Edit Line Up</a>}
+                    ? <a href={`/round/${m.round}`}>View Position History</a>
+                    : <a href={`/round/${m.round}`}>Edit Line Up</a>}
                   </td>
-                  <td>
+                  <td className="actions">
                     {m.round == matches.length
                      ? <img title="Delete" src="/assets/x-square.svg" alt="sort" width="20" height="20" onClick={() => _delete(m)}/>
                      : ""

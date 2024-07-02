@@ -1,18 +1,43 @@
 import React, {JSX, ReactNode, useState} from "react";
-import {makeTableHeading, put, renderReactApp, updateElement} from "./util";
+import {makeTableHeading, put, renderReactApp} from "./util";
 import {Player} from "./players";
 import * as _ from "lodash";
-import {Simulate} from "react-dom/test-utils";
-import play = Simulate.play;
+import {forEach} from "lodash";
 
-export const LineupEditor = (player_data:Player[]) => {
+export const LineupEditor = (MatchID: number, fixtureRound:number, quarter:number, playerData:Player[], lineupData:any) => {
 
+  type PositionKey = {line: string, index: number}
   let sortData = {field: '', dir: -1};
+
+  function conformsTo(lineup:{[key:string]:Player[]}, template:{[key:string]:Player[]}) {
+    for(let k in lineup) {
+      if (lineup[k].length != template[k].length) { return false; }
+    }
+    return true;
+  }
+
+  const fiveByThreeLineup = {"FF": Array(3), "HF": Array(3), "C": Array(3), "HB": Array(3), "FB": Array(3)};
+  if (lineupData) {
+    if ( !conformsTo(lineupData, fiveByThreeLineup)) {
+      alert("Ignoring saved lineup data as it does not match 5 x 3 lineup.");
+    } else {
+      for (const line in lineupData) {
+        lineupData[line].forEach((id:number, i:number) => {
+          if (id > 0) {
+            const player = _.find(playerData, {id: id});
+            // @ts-ignore
+            if (player) { fiveByThreeLineup[line][i] = player; }
+          }
+        });
+      }
+    }
+  }
+
   const App = () => {
-    const [players, setPlayers] = useState<Player[]>(player_data);
+    const [players, setPlayers] = useState<Player[]>(playerData);
     const [selectedPlayer, setSelectedPlayer] = useState<Player|null>(null);
-    const [selectedPosition, setSelectedPosition] = useState<number>(0);
-    const [assignedPositions, setAssignedPositions] = useState<Player[]>(Array(15))
+    const [selectedPosition, setSelectedPosition] = useState<PositionKey|null>(null);
+    const [assignedPositions, setAssignedPositions] = useState<{[key:string]:Player[]}>(fiveByThreeLineup);
 
     // @ts-ignore
     function TableHeading({sortField, label}): ReactNode {
@@ -20,13 +45,16 @@ export const LineupEditor = (player_data:Player[]) => {
     }
 
     // @ts-ignore
-    function Position({index}) {
-      const p = assignedPositions[index];
+    function Position({line, index}) {
+      // @ts-ignore
+      const position = {line:line, index:index};
+      const player = getPlayerAt(position);
+
       return (
         <div className="col">
-          <div className={(selectedPosition == index) ? "selected position" : "position" } onClick={() => selectPosition(index)}>
-            {p
-              ? <p>{p.number} <br/> {p.first_name} {p.last_name?.charAt(0)}</p>
+          <div className={(_.isEqual(selectedPosition, position)) ? "selected position" : "position" } onClick={() => selectPosition(position)}>
+            {player
+              ? <p>{player.number} <br/> {player.first_name} {player.last_name?.charAt(0)}</p>
               : <p>&nbsp;</p>
             }
           </div>
@@ -34,117 +62,176 @@ export const LineupEditor = (player_data:Player[]) => {
       )
     }
 
-    function selectPosition(index:number) {
-      const assignedPlayer = assignedPositions[index];
-      if (selectedPosition == index) {
-        setSelectedPosition(0);
-      } else if (selectedPlayer) {
-        if (assignedPlayer) {
-          swapPlayerPositions(selectedPlayer, index, assignedPlayer);
+    function selectPosition(newPosition: PositionKey) {
+      const prevPosition = selectedPosition;
+      const prevPlayer = selectedPlayer;
+      const newPlayer = getPlayerAt(newPosition);
+
+      // if another position is already selected
+      if (prevPosition) {
+        if (prevPosition == newPosition) {
+          clearSelections();
+        } else if (newPlayer || prevPlayer) {
+          swapPositions(prevPosition, newPosition);
         } else {
-          assignPlayerToPosition(selectedPlayer, index);
+          setSelectedPosition(newPosition);
         }
-      } else {
-        setSelectedPosition(index);
-        if (assignedPlayer) { setSelectedPlayer(assignedPlayer); }
+        return;
       }
+
+      // if we have already selected a player from the list
+      if (selectedPlayer) {
+        makeAssignments([[selectedPlayer, newPosition]]);
+        return;
+      }
+
+      // otherwise just selected this position and player
+      setSelectedPosition(newPosition);
+      setSelectedPlayer(newPlayer);
     }
 
     function selectPlayer(p:Player) {
+      if (isAssigned(p)) { return; }
+
       if (selectedPlayer == p) {
-        setSelectedPlayer(null);
+        setSelectedPlayer(null); // deselect by click player twice
       }
       else if (selectedPosition) {
-        assignPlayerToPosition(p, selectedPosition);
+        makeAssignments([[p, selectedPosition]]);
       }
       else {
         setSelectedPlayer(p);
       }
     }
 
-    function updatePlayer(player:Player, data:any) {
-      return updateElement(player, players, setPlayers, data);
+    function makeAssignments(assignments: (Player | PositionKey)[][]) {
+      let newAssignments = _.cloneDeep(assignedPositions);
+      assignments.forEach((p_pk) => {
+        const [player,position] = p_pk;
+        // @ts-ignore
+        newAssignments[position.line][position.index] = player;
+      });
+      setAssignedPositions(newAssignments);
+      clearSelections()
     }
 
-    function swapPlayerPositions(p1:Player, p2Position:number, p2:Player) { assignPlayerToPosition(p1, p2Position, p2); }
+    function swapPositions(pos1:PositionKey, pos2:PositionKey) {
+      const player1 = getPlayerAt(pos1);
+      const player2 = getPlayerAt(pos2);
+      makeAssignments([[player1, pos2], [player2, pos1]]);
+    }
 
-    function assignPlayerToPosition(player:Player, position:number, p2:(Player|null)=null) {
-      let newAssignments = Array.from(assignedPositions);
-      const existingAssignment = assignedPositions.indexOf(player);
-      if (existingAssignment) {
-        //@ts-ignore
-        newAssignments[existingAssignment] = p2;
-      }
-      newAssignments[position] = player;
-      setAssignedPositions(newAssignments);
-      setSelectedPosition(0);
+    function clearSelections() {
+      setSelectedPosition(null);
       setSelectedPlayer(null);
     }
+
+    function isAssigned(p:Player) {
+      const players = _.flatten(_.values(assignedPositions));
+      return _.includes(_.map(players, 'id'), p.id);
+    }
+
+    function getPlayerAt(p:PositionKey) { return assignedPositions[p.line][p.index]; }
 
     function playerRowClass(p:Player) {
       let className = '';
       if (selectedPlayer == p) { className += 'selected '; }
-      if (assignedPositions.indexOf(p) >= 0) { className += 'assigned '; }
+      if (isAssigned(p)) { className += 'assigned '; }
       return className;
     }
 
+    function Save(quarter?:number) {
+      let quarters;
+      if (quarter) { quarters = [quarter]; }
+      else { quarters = [1,2,3,4]}
+
+      let lineup:{[key:string]:(number)[]} = {};
+      for (const line in assignedPositions) {
+        lineup[line] = []
+        assignedPositions[line].forEach((p,i) => {
+          if (p) { lineup[line][i] = p.id;}
+          else { lineup[line][i] = -1;}
+        })
+      }
+
+      put(`/matches/${MatchID}`, {quarters: quarters, lineup: lineup}).
+        then(() => {
+          if (!quarter || quarter == 4) { window.location.assign("/matches"); }
+          else { window.location.assign(urlForQuarter(quarter+1)); }
+        }).
+        catch(error => { alert('Unexpected Error') });
+    }
+
+    function urlForQuarter(quarter:number) { return `/round/${fixtureRound}/quarter/${quarter}`; }
 
     return (
       <div className="row">
         <div className="col line-up">
-        <h3>Line Up</h3>
-            <div className="field">
-              <div className="row align-items-center">
-                <div className="col-1 heading">FF</div>
-                <Position index={1}/>
-                <Position index={2}/>
-                <Position index={3}/>
-              </div>
-              <div className="row">
-                <div className="col-1 heading">HF</div>
-                <Position index={4}/>
-                <Position index={5}/>
-                <Position index={6}/>
-              </div>
-              <div className="row">
-                <div className="col-1 heading">C</div>
-                <Position index={7}/>
-                <Position index={8}/>
-                <Position index={9}/>
-              </div>
-              <div className="row">
-                <div className="col-1 heading">HB</div>
-                <Position index={10}/>
-                <Position index={11}/>
-                <Position index={12}/>
-              </div>
-              <div className="row">
-                <div className="col-1 heading">FB</div>
-                <Position index={13}/>
-                <Position index={14}/>
-                <Position index={15}/>
-              </div>
-            </div>
+          <h3>Quarter {quarter} Lineup</h3>
+          <div className="pagination">
+            {quarter > 1 ? <a className="page-link" href={urlForQuarter(quarter-1)}>Prev</a> : <div/> }
+            {quarter < 4 ? <a className="page-link" href={urlForQuarter(quarter+1)}>Next</a> : <div/> }
           </div>
-          <div className="col team-list">
-            <h3>Team List</h3>
-            <table className="table">
-              <thead>
-              <tr className="sortable-row">
-                <TableHeading label="#" sortField="number"/>
-                <TableHeading label="Player" sortField="first_name"/>
-                <TableHeading label="FF" sortField="full_forward"/>
-                <TableHeading label="HF" sortField="half_forward"/>
-                <TableHeading label="C" sortField="center"/>
-                <TableHeading label="HB" sortField="half_back"/>
-                <TableHeading label="FB" sortField="full_back"/>
-                <TableHeading label="Bch" sortField="bench"/>
-                <TableHeading label="Abs" sortField="absent"/>
-              </tr>
-              </thead>
-              <tbody>
-              {players.map((p) =>
-                <tr key={p.id} className={playerRowClass(p)} onClick={() => {selectPlayer(p)}}>
+          <section className="field">
+            <div className="row align-items-center">
+            <div className="col-1 heading">FF</div>
+              <Position line="FF" index={0}/>
+              <Position line="FF" index={1}/>
+              <Position line="FF" index={2}/>
+            </div>
+            <div className="row">
+              <div className="col-1 heading">HF</div>
+              <Position line="HF" index={0}/>
+              <Position line="HF" index={1}/>
+              <Position line="HF" index={2}/>
+            </div>
+            <div className="row">
+              <div className="col-1 heading">C</div>
+              <Position line="C" index={0}/>
+              <Position line="C" index={1}/>
+              <Position line="C" index={2}/>
+            </div>
+            <div className="row">
+              <div className="col-1 heading">HB</div>
+              <Position line="HB" index={0}/>
+              <Position line="HB" index={1}/>
+              <Position line="HB" index={2}/>
+            </div>
+            <div className="row">
+              <div className="col-1 heading">FB</div>
+              <Position line="FB" index={0}/>
+              <Position line="FB" index={1}/>
+              <Position line="FB" index={2}/>
+            </div>
+          </section>
+          <section>
+            <div className="save actions">
+              <button className="btn btn-primary" onClick={() => Save(quarter)}>Save - Quarter {quarter}</button>
+              <button className="btn btn-secondary" onClick={() => Save()}>Save - Whole Game</button>
+            </div>
+          </section>
+        </div>
+        <div className="col team-list">
+          <h3>Team List</h3>
+          <table className="table">
+            <thead>
+            <tr className="sortable-row">
+              <TableHeading label="#" sortField="number"/>
+              <TableHeading label="Player" sortField="first_name"/>
+              <TableHeading label="FF" sortField="full_forward"/>
+              <TableHeading label="HF" sortField="half_forward"/>
+              <TableHeading label="C" sortField="center"/>
+              <TableHeading label="HB" sortField="half_back"/>
+              <TableHeading label="FB" sortField="full_back"/>
+              <TableHeading label="Bch" sortField="bench"/>
+              <TableHeading label="Abs" sortField="absent"/>
+            </tr>
+            </thead>
+            <tbody>
+            {players.map((p) =>
+                <tr key={p.id} className={playerRowClass(p)} onClick={() => {
+                  selectPlayer(p)
+                }}>
                   <td className="number">{p.number}</td>
                   <td>
                     <div className="player">
@@ -158,16 +245,13 @@ export const LineupEditor = (player_data:Player[]) => {
                   <td>{p.half_back}</td>
                   <td>{p.bench}</td>
                   <td>{p.absent}</td>
-                </tr>
-            )}
-          </tbody>
-      </table>
-    </div>
-
-  </div>
-
-  )
-    ;
+                    </tr>
+                )}
+              </tbody>
+          </table>
+        </div>
+      </div>
+    );
   };
 
   return {

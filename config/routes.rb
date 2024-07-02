@@ -9,4 +9,5 @@ Rails.application.routes.draw do
   # root "posts#index"
   resources 'players'
   resources 'matches'
+  get "round/:round(/quarter/:quarter)" => "matches#show"
 end
