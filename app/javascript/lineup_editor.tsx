@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import {Simulate} from "react-dom/test-utils";
 import play = Simulate.play;
 
-export const LineupEditor = (player_data:Player[]) => {
+export const LineupEditor = (player_data:Player[], lineup_data:any) => {
 
   let sortData = {field: '', dir: -1};
   const App = () => {
@@ -62,17 +62,12 @@ export const LineupEditor = (player_data:Player[]) => {
       }
     }
 
-    function updatePlayer(player:Player, data:any) {
-      return updateElement(player, players, setPlayers, data);
-    }
-
     function swapPlayerPositions(p1:Player, p2Position:number, p2:Player) { assignPlayerToPosition(p1, p2Position, p2); }
 
     function assignPlayerToPosition(player:Player, position:number, p2:(Player|null)=null) {
       let newAssignments = Array.from(assignedPositions);
       const existingAssignment = assignedPositions.indexOf(player);
-      if (existingAssignment) {
-        //@ts-ignore
+      if (existingAssignment && p2) {
         newAssignments[existingAssignment] = p2;
       }
       newAssignments[position] = player;

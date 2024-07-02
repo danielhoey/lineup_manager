@@ -3,7 +3,7 @@ class CreateMatches < ActiveRecord::Migration[7.1]
     create_table :matches do |t|
       t.integer :round
       t.string :opponent
-      t.text :line_up
+      t.text :lineup
       t.boolean :completed
       t.timestamps
     end

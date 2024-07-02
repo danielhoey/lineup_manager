@@ -1,9 +1,9 @@
 script(defer=true)
-  | window.onload = () => { reactApps.LineupEditor(#{@players.to_json.html_safe}).render('lineup_app'); }
+  | window.onload = () => { reactApps.LineupEditor(#{@players.to_json.html_safe}, #{@match.lineup.to_json.html_safe}).render('lineup_app'); }
 
 div(class="container #{controller_name} #{action_name}")
-  h1 Round 1
-  h2 vs Coolbinia Black
+  h1 Round #{@match.round}
+  h2 vs #{@match.opponent}
 
   section
     div(id="lineup_app")

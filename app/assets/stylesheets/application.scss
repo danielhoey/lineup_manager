@@ -37,6 +37,9 @@ table + section { margin-top: 2rem; }
   th > .sort { margin-left: 0.5em; }
 }
 
+
+.actions * { cursor: pointer; }
+
 @include media-breakpoint-down(sm) {
   form .col-sm { margin-bottom: 1em; }
 }
@@ -44,7 +47,7 @@ table + section { margin-top: 2rem; }
 body > .players.index {
   table {
     .actions { width: 80px; }
-    .actions img { margin-right: 0.5em; cursor: pointer; }
+    .actions img { cursor: pointer; }
     input[type="text"] { width: 130px; margin-right: 10px; }
     input[type="number"] { width: 70px; }
     th.number { width: 8em; }
