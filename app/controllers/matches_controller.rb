@@ -9,7 +9,11 @@ class MatchesController < ApplicationController
   end
 
   def show
-    @match = Match.where(round: params[:round]).first
+    if params[:round]
+      @match = Match.where(round: params[:round]).first
+    else
+      @match = Match.where(id: params[:id]).first
+    end
     raise ActiveRecord::RecordNotFound.new("Round #{params[:round]} not found") if @match.nil?
     @players = Player.active
   end

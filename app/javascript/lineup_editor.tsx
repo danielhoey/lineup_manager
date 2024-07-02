@@ -12,7 +12,8 @@ export const LineupEditor = (player_data:Player[], lineup_data:any) => {
     const [players, setPlayers] = useState<Player[]>(player_data);
     const [selectedPlayer, setSelectedPlayer] = useState<Player|null>(null);
     const [selectedPosition, setSelectedPosition] = useState<number>(0);
-    const [assignedPositions, setAssignedPositions] = useState<Player[]>(Array(15))
+    const [assignedPositions, setAssignedPositions] = useState<Player[]>(Array(15));
+    const [playerPositions, setPlayerPositions] = useState<{[key:number]:number}>({});
 
     // @ts-ignore
     function TableHeading({sortField, label}): ReactNode {
@@ -38,15 +39,17 @@ export const LineupEditor = (player_data:Player[], lineup_data:any) => {
       const assignedPlayer = assignedPositions[index];
       if (selectedPosition == index) {
         setSelectedPosition(0);
+        if (assignedPlayer == selectedPlayer) { setSelectedPlayer(null); }
       } else if (selectedPlayer) {
         if (assignedPlayer) {
           swapPlayerPositions(selectedPlayer, index, assignedPlayer);
         } else {
-          assignPlayerToPosition(selectedPlayer, index);
+          swapPlayerPositions(selectedPlayer, index, null);
         }
       } else {
         setSelectedPosition(index);
-        if (assignedPlayer) { setSelectedPlayer(assignedPlayer); }
+        if (assignedPlayer) {
+          setSelectedPlayer(assignedPlayer); }
       }
     }
 
@@ -62,14 +65,21 @@ export const LineupEditor = (player_data:Player[], lineup_data:any) => {
       }
     }
 
-    function swapPlayerPositions(p1:Player, p2Position:number, p2:Player) { assignPlayerToPosition(p1, p2Position, p2); }
-
-    function assignPlayerToPosition(player:Player, position:number, p2:(Player|null)=null) {
+    function swapPlayerPositions(p1:Player, p2Position:number, p2:Player|null) {
       let newAssignments = Array.from(assignedPositions);
-      const existingAssignment = assignedPositions.indexOf(player);
-      if (existingAssignment && p2) {
-        newAssignments[existingAssignment] = p2;
+      const existingAssignment = assignedPositions.indexOf(p1);
+      if (existingAssignment) {
+        if (p2) { newAssignments[existingAssignment] = p2; }
+        else { delete newAssignments[existingAssignment]; }
       }
+      newAssignments[p2Position] = p1;
+      setAssignedPositions(newAssignments);
+      setSelectedPosition(0);
+      setSelectedPlayer(null);
+    }
+
+    function assignPlayerToPosition(player:Player, position:number) {
+      let newAssignments = Array.from(assignedPositions);
       newAssignments[position] = player;
       setAssignedPositions(newAssignments);
       setSelectedPosition(0);

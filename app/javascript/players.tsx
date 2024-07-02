@@ -4,7 +4,7 @@ import {ErrorMessage, Field, Form, Formik, FormikHelpers, FormikState} from "for
 import * as _ from "lodash";
 
 export type Player = {
-  id: bigint,
+  id: number,
   first_name: string,
   last_name: string,
   number: number,
