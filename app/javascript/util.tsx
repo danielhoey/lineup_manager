@@ -9,22 +9,20 @@ export const renderReactApp = (elementId:string, reactApp:React.ElementType) => 
   ReactDOM.createRoot(element).render(<StrictMode><FN /></StrictMode>);
 }
 
-export function post(url:string, data:Object):Promise<Response> {
-  let csrf = getCsrfToken();
-  let promise = fetch(url, {method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }, body: JSON.stringify(data)});
-  return promise.then(response => response.json());
-}
+export const post = (url:string, data:Object):Promise<Response> => fetchJSON(url, 'POST', data);
+export const put = (url:string, data:Object):Promise<Response> => fetchJSON(url, 'PUT', data);
+export const http_delete = (url:string):Promise<Response> => fetchJSON(url, 'DELETE');
 
-export function put(url:string, data:Object):Promise<Response> {
-  let csrf = getCsrfToken();
-  let promise = fetch(url, {method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }, body: JSON.stringify(data)});
-  return promise.then(response => response.json());
-}
+function fetchJSON(url:string, method:string, data?:Object):Promise<Response> {
+  const csrf = getCsrfToken();
+  let httpParams = {method: method, headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': csrf }};
+  // @ts-ignore
+  if (data) { httpParams.body = JSON.stringify(data); }
+  return fetch(url, httpParams).then(response => {
+            if (response.ok) { return response.json(); }
+            throw new FetchError(response);
+          });
 
-export function http_delete(url:string):Promise<Response> {
-  let csrf = getCsrfToken();
-  let promise = fetch(url, {method: 'DELETE', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }});
-  return promise.then(response => response.json());
 }
 
 function getCsrfToken(){
@@ -32,7 +30,13 @@ function getCsrfToken(){
   return element.getAttribute("content") || '';
 }
 
-
+class FetchError extends Error {
+  private response: Response;
+  constructor(response:Response) {
+    super(`Fetch() failed with HTTP error ${response.status}`);
+    this.response = response;
+  }
+}
 
 //@ts-ignore
 export function updateElement(element, elementsArray, setElementsFn, newData){

@@ -1,5 +1,5 @@
 import React, {ReactNode, useState} from "react";
-import {http_delete, makeTableHeading, post, put, renderReactApp, updateElement} from "./util";
+import {http_delete, post, put, renderReactApp, updateElement} from "./util";
 import {ErrorMessage, Field, Form, Formik, FormikHelpers, FormikState} from "formik";
 import * as _ from "lodash";
 import {Player} from "./players";
@@ -27,14 +27,13 @@ export const MatchesList = (match_data:Match[]) => {
       }
 
       setTimeout(() => {
-        const r = post("/matches", values);
-        r.then(data => setMatches([...matches, data]));
-        r.then(() => resetForm());
-        r.catch(error => {
-          formikBag.setErrors(error);
-          resetForm();
-        });
-
+        post("/matches", values)
+          .then(data => { setMatches([...matches, data]) })
+          .then(() => resetForm())
+          .catch(() => {
+            alert("Unexpected error");
+            formikBag.setSubmitting(false);
+          });
       }, 100);
 
     }
@@ -42,9 +41,9 @@ export const MatchesList = (match_data:Match[]) => {
     let nextRound = () => matches.length+1;
 
     let _delete = (m: Match) => {
-      const r = http_delete(`/matches/${m.id}`);
-      r.then(() =>  setMatches(_.reject(matches, m)));
-      r.catch(error => alert('Unexpected error'));
+      http_delete(`/matches/${m.id}`)
+        .then(() =>  setMatches(_.reject(matches, m)))
+        .catch(() => alert('Unexpected error'));
     }
 
     return (

@@ -38,27 +38,29 @@ export const PlayersList = (player_data:Player[]) => {
           return;
         }
 
-        const r = post("/players", values);
-        r.then(data => setPlayers([...players, data]));
-        r.then(() => resetForm());
-        r.catch(error => {
-          formikBag.setErrors(error);
-          resetForm();
-        });
+        post("/players", values)
+          .then(data => setPlayers([...players, data]))
+          .then(() => resetForm())
+          .catch(response => {
+            response.json().then((errors:any) => {
+              formikBag.setErrors(errors);
+              resetForm();
+            })
+          });
 
       }, 100);
     };
 
     function _delete(player:Player){
-      const r = http_delete(`/players/${player.id}`);
-      r.then((data:any) => {
-        if (data.deleted){
-          setPlayers(_.reject(players, {id: player.id}));
-        } else {
-          updatePlayer(player, data)
-        }
-      });
-      r.catch(error => { alert('Unexpected Error') });
+      http_delete(`/players/${player.id}`)
+        .then((data:any) => {
+          if (data.deleted){
+            setPlayers(_.reject(players, {id: player.id}));
+          } else {
+            updatePlayer(player, data)
+          }
+        })
+        .catch(() => { alert('Unexpected Error') });
     }
 
     function updatePlayer(player:Player, data:any) {
