@@ -68,7 +68,7 @@ body > .matches.show {
     tr { cursor: pointer;}
     td > .player { padding: 3px; margin: 2px; }
     tr.selected > td > .player { border: 2px solid $primary; border-radius: 7px; margin: 0; }
-    tr.assigned > td { opacity: 0.5; }
+    tr.assigned > td { opacity: 0.5; cursor: default; }
   }
 
   .line-up {

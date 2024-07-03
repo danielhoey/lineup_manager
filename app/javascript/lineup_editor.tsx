@@ -36,59 +36,78 @@ export const LineupEditor = (player_data:Player[], lineup_data:any) => {
       )
     }
 
-    function selectPosition(position:number) {
-      const playerAtPosition = assignedPositions[position];
-      if (selectedPosition) {
-        if (selectedPosition == position) {
-          setSelectedPosition(0);
-          setSelectedPlayer(null);
-        } else if (playerAtPosition) {
-          assignPlayerToPosition(assignedPositions[selectedPosition], position);
-        } else if (selectedPlayer) {
-          assignPlayerToPosition(selectedPlayer, position);
+    function selectPosition(newPosition:number) {
+      const prevPosition = selectedPosition;
+      const prevPlayer = selectedPlayer;
+      const newPlayer = assignedPositions[newPosition];
+
+      // if another position is already selected
+      if (prevPosition) {
+        if (prevPosition == newPosition) {
+          clearSelections();
+        } else if (newPlayer || prevPlayer) {
+          swapPositions(prevPosition, newPosition);
         } else {
-          setSelectedPosition(position);
+          setSelectedPosition(newPosition);
         }
-      } else if (selectedPlayer) {
-        assignPlayerToPosition(selectedPlayer, position);
-      } else {
-        setSelectedPosition(position);
-        setSelectedPlayer(playerAtPosition);
+        return;
       }
+
+      // if we have already selected a player from the list
+      if (selectedPlayer) {
+        assignPosition(selectedPlayer, newPosition);
+        return;
+      }
+
+      // otherwise just selected this position and player
+      setSelectedPosition(newPosition);
+      setSelectedPlayer(newPlayer);
     }
 
     function selectPlayer(p:Player) {
+      if (isAssigned(p)) { return; }
+
       if (selectedPlayer == p) {
-        setSelectedPlayer(null);
+        setSelectedPlayer(null); // deselect by click player twice
       }
       else if (selectedPosition) {
-        assignPlayerToPosition(p, selectedPosition);
+        assignPosition(p, selectedPosition);
       }
       else {
         setSelectedPlayer(p);
       }
     }
 
-    function assignPlayerToPosition(player:Player, position:number) {
+    function swapPositions(pos1:number, pos2:number) {
       let newAssignments = Array.from(assignedPositions);
-      const existingPosition = assignedPositions.indexOf(player);
-      if (existingPosition) { delete newAssignments[existingPosition]; }
-      const existingPlayer = assignedPositions[position];
-      if (existingPlayer) { newAssignments[selectedPosition] = existingPlayer; }
-      updatePosition(newAssignments, player, position);
+      const player1 = assignedPositions[pos1];
+      const player2 = assignedPositions[pos2];
+      newAssignments[pos2] = player1;
+      newAssignments[pos1] = player2;
+      setAssignedPositions(newAssignments);
+      clearSelections()
     }
 
-    function updatePosition(newAssignments:Player[], player:Player, position:number) {
+    function assignPosition(player:Player, position:number) {
+      let newAssignments = Array.from(assignedPositions);
       newAssignments[position] = player;
       setAssignedPositions(newAssignments);
+      clearSelections()
+    }
+
+    function clearSelections() {
       setSelectedPosition(0);
       setSelectedPlayer(null);
+    }
+
+    function isAssigned(p:Player) {
+      return assignedPositions.indexOf(p) >= 0;
     }
 
     function playerRowClass(p:Player) {
       let className = '';
       if (selectedPlayer == p) { className += 'selected '; }
-      if (assignedPositions.indexOf(p) >= 0) { className += 'assigned '; }
+      if (isAssigned(p)) { className += 'assigned '; }
       return className;
     }
 
