@@ -123,18 +123,16 @@ export const PlayersList = (player_data:Player[]) => {
                         : <p>{p.number}</p>
                       }
                     </td>
-                    <td className="actions">
-                      {p.editing
-                        ? <div>
-                            <img title="Save" src="/assets/floppy.svg" alt="sort" width="20" height="20" onClick={savePlayer}/>
-                            <img title="Cancel" src="/assets/cancel.svg" alt="sort" width="20" height="20" onClick={cancelEdit}/>
-                          </div>
-                          : <div>
-                            <img title="Edit" src="/assets/pencil-square.svg" alt="sort" width="20" height="20" onClick={() => updatePlayer(p, {editing: true})}/>
-                            <img title="Delete" src="/assets/x-square.svg" alt="sort" width="20" height="20" onClick={() => _delete(p)}/>
-                          </div>
-                      }
-                    </td>
+                    {p.editing
+                      ? <td className="actions">
+                          <img title="Save" src="/assets/floppy.svg" alt="sort" width="20" height="20" onClick={savePlayer}/>
+                          <img title="Cancel" src="/assets/cancel.svg" alt="sort" width="20" height="20" onClick={cancelEdit}/>
+                        </td>
+                        : <td className="actions">
+                          <img title="Edit" src="/assets/pencil-square.svg" alt="sort" width="20" height="20" onClick={() => updatePlayer(p, {editing: true})}/>
+                          <img title="Delete" src="/assets/x-square.svg" alt="sort" width="20" height="20" onClick={() => _delete(p)}/>
+                        </td>
+                    }
                     <td>{p.full_forward}</td>
                     <td>{p.half_forward}</td>
                     <td>{p.center}</td>
