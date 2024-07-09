@@ -1,0 +1,10 @@
+ul.nav.nav-underline
+  li.nav-item
+    a.nav-link(href="/matches") Matches
+  li.nav-item
+    a.nav-link(href="/players") Players
+
+
+script(defer=true)
+  | const el = document.body.querySelector(`ul.nav a[href="${location.pathname}"]`);
+    if (el) { el.classList.add("active"); }

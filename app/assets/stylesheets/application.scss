@@ -22,6 +22,13 @@ section { margin-top: 1rem; }
 section + section { margin-top: 2rem; }
 table + section { margin-top: 2rem; }
 
+header {
+  display: flex;
+  justify-content: space-between;
+  .nav > * { margin-inline: 0.5rem; }
+  .nav-underline .nav-link.active { color: var(--bs-nav-link-color); }
+}
+
 .sortable-row {
   th { cursor: pointer; }
 

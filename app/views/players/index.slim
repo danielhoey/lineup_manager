@@ -2,7 +2,10 @@ script(defer=true)
   | window.onload = () => { reactApps.PlayersList(#{@players.to_json.html_safe}).render('player_list_app'); }
 
 div(class="container players index")
-  h1 Player List
+  header
+    div.title
+      h1 Player List
+    = render(partial: "common/nav_links")
 
   div(id="player_list_app")
 

@@ -2,10 +2,14 @@ script(defer=true)
   | window.onload = () => { reactApps.LineupEditor(#{@match.id}, #{@match.round}, #{@quarter}, #{@players.to_json.html_safe}, #{@lineup.to_json.html_safe}).render('lineup_app'); }
 
 div(class="container #{controller_name} #{action_name}")
-  h1 Round #{@match.round}
-  h2 vs #{@match.opponent}
+  header
+    div.title
+      h1 Round #{@match.round}
+      h2 vs #{@match.opponent}
+
+    = render(partial: "common/nav_links")
 
   section
-    div(id="lineup_app")
+    div#lineup_app
 
 
